@@ -1,0 +1,14 @@
+*
++
+-
+/
+"a string"; // a line comment
+10.20;
+name := "mitch small";
+longer_name := "mitchell small";
+name: []number = [1, 2, 3];
+/*
+main :: (...vargs) {
+  return;
+}
+*/

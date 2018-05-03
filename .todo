@@ -1,0 +1,10 @@
+[x] fix allocation on array
+[ ] array bounds assertations
+
+[ ] Scanner
+  [ ] having trouble with block comment; match not working as expected. gonna shelve block comment support for now.
+  [ ] add hash map for keywords
+    [ ] chandler caruth has me covered, check his video
+  [ ]
+
+[ ] ASTs

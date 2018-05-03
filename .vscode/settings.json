@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "*.vue": "vue",
+    "Justfile": "makefile",
+    "*.ignoreme": "plaintext",
+    "*.todo": "todo",
+    "*.scheme": "scheme",
+    "*.h": "c",
+    "*.jsonc": "jsonc",
+    "iterator": "cpp",
+    "vector": "cpp",
+    "__bit_reference": "cpp",
+    "algorithm": "cpp",
+    "unordered_map": "cpp"
+  }
+}
