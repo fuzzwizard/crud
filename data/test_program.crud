@@ -8,6 +8,8 @@ name := "mitch small";
 longer_name := "mitchell small";
 name: []number = [1, 2, 3];
 if false 0 else 1;
+U16_MAX :: 65536;
+__scan_this := 420;
 /*
 main :: (...vargs) {
   return;

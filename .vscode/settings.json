@@ -11,6 +11,9 @@
     "vector": "cpp",
     "__bit_reference": "cpp",
     "algorithm": "cpp",
-    "unordered_map": "cpp"
+    "unordered_map": "cpp",
+    "__hash_table": "cpp",
+    "__split_buffer": "cpp",
+    "initializer_list": "cpp"
   }
 }

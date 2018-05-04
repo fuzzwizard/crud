@@ -195,6 +195,10 @@ struct Array {
     return &data[i];
   }
 
+  T* last() {
+    return at(count - 1);
+  }
+
   // void append(Slice<T> slice) {
   //   auto dest = add(slice.length);
   //   for (size_t i = 0; i < slice.length; i++) {
@@ -570,10 +574,11 @@ struct Scanner {
       // literals
       case '"': do_string(); break;
       default:
+        printf("scanning: %c\n", c);
         if (is_digit(c)) {
           do_number();
-        } else if (is_alpha(c)) {
-          do_identifier();
+        } else if (is_alpha(c) || c == '_') { // TODO: replace `is_alpha` with `is_legal_ident_char` or smth
+          do_identifier(c);
         } else {
           crud_error("Unrecognized character: '%c' (%d), line: %lu\n", c, c, line);
         }
@@ -608,9 +613,14 @@ struct Scanner {
     add_token(NUMBER);
   };
 
-  void do_identifier() {
-    // TODO: leading sigil support ($, #, @)
-    while (is_alpha(peek()) || peek() == '_') advance();
+  void do_identifier(char leader) {
+    // TODO: leading sigil support?? ($, #, @)
+    if (!(is_alpha(leader) || leader == '_')) {
+      printf("last token read: %s\n", token_type_to_string(tokens.last()->type));
+      printf("peeking at: %c \n", peek());
+      crud_error("Identifiers must begin with a letter or underscore. line: %d\n", line);
+    }
+    while (is_alpha(peek()) || is_digit(peek()) || peek() == '_') advance();
     Token_Type t = get_keyword_type((char*)&source->data[start], current - start);
     add_token(t);
   };
