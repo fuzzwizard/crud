@@ -616,9 +616,10 @@ struct Scanner {
   void do_identifier(char leader) {
     // TODO: leading sigil support?? ($, #, @)
     if (!(is_alpha(leader) || leader == '_')) {
-      printf("last token read: %s\n", token_type_to_string(tokens.last()->type));
-      printf("peeking at: %c \n", peek());
-      crud_error("Identifiers must begin with a letter or underscore. line: %d\n", line);
+      // printf("last token read: %s\n", token_type_to_string(tokens.last()->type));
+      // printf("peeking at: %c \n", peek());
+      // TODO: These should print the scanning context
+      crud_error("Invalid leading char. char: %c line: %d\n", leader, line);
     }
     while (is_alpha(peek()) || is_digit(peek()) || peek() == '_') advance();
     Token_Type t = get_keyword_type((char*)&source->data[start], current - start);
