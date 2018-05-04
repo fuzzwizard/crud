@@ -61,6 +61,7 @@ template <typename F> ScopeGuard<F> operator+(ScopeGuardOnExit, F&& fn) {
 }
 } // namespace _scope_guards
 
+// TODO: why aint this work? for why does this break???? big questions
 #define defer                                                                  \
   auto UNIQUE(defer_) = _scope_guards::ScopeGuardOnExit() + [&]()
 
@@ -102,7 +103,7 @@ static inline int string_length(char* str) {
   return i;
 }
 
-static inline bool string_compare(char* a, const char* b) {
+static inline bool string_match(char* a, const char* b) {
   int i = 0;
   while (a[i] && b[i]) {
     if (a[i] != b[i]) return false;
@@ -110,11 +111,9 @@ static inline bool string_compare(char* a, const char* b) {
   }
   return true;
 }
-static inline bool string_compare(char* a, const char* b, size_t i) {
-  while (i) {
+static inline bool string_match(char* a, const char* b, const size_t l) {
+  for (size_t i = 0; i < l; i++)
     if (a[i] != b[i]) return false;
-    i--;
-  }
   return true;
 }
 
@@ -315,10 +314,10 @@ struct HashMap {
 
 
   static size_t internal_hash(u8* data, const size_t length) {
-        // FNV hash
-    uint32_t r = 2166136261;
+    // FNV hash
+    size_t r = 2166136261;
     for (size_t i = 0; i < length; i++) {
-        r ^= *data;
+        r ^= data[i];
         r *= 16777619;
     }
     return r;
@@ -351,8 +350,6 @@ struct HashMap {
 };
 
 
-
-
 enum Token_Type {
   SEMICOLON, DOT, COMMA,
 
@@ -377,7 +374,8 @@ enum Token_Type {
   AND, OR,
   IF, ELSE,
   WHILE, FOR,
-  // STRUCT,
+  TRUE, FALSE,
+  STRUCT, DEF,
   // UNION,
   // ENUM,
   // SWITCH,
@@ -416,6 +414,8 @@ const char* token_type_to_string(Token_Type t) {
     Case(AND);    Case(OR);
     Case(IF);     Case(ELSE);
     Case(WHILE);  Case(FOR);
+    Case(TRUE);   Case(FALSE);
+    Case(STRUCT); Case(DEF);
 
     Case(END_OF_FILE);
 
@@ -437,10 +437,21 @@ Keyword keyword_table[] = {
   { "else", ELSE },
   { "while", WHILE },
   { "for", FOR },
+  { "true", TRUE },
+  { "false", FALSE },
+  { "struct", STRUCT },
+  { "def", DEF },
   { 0 } // sentinel
 };
 
-
+Token_Type get_keyword_type(char * str, size_t str_l) {
+  Keyword* k = keyword_table;
+  while (k->lexeme) {
+    if (string_match(str, k->lexeme, str_l)) return k->type;
+    k++;
+  }
+  return IDENTIFIER; // regular old identifier
+}
 
 struct Token {
   Token_Type type;
@@ -539,7 +550,7 @@ struct Scanner {
           if (match('/')) {
             add_token(BLOCK_COMMENT);
           } else {
-            assert(!"Unterminated block comment.");
+            crud_error("Unterminated block comment on line %lu\n.", line);
           }
         } else {
           add_token(match('=') ? SLASH_EQUALS : SLASH);
@@ -586,6 +597,7 @@ struct Scanner {
   };
 
   void do_number() {
+    // TODO: hex, binary, float representations
     while(is_digit(peek())) advance();
 
     if (peek() == '.' && is_digit(peek_next())) {
@@ -599,8 +611,8 @@ struct Scanner {
   void do_identifier() {
     // TODO: leading sigil support ($, #, @)
     while (is_alpha(peek()) || peek() == '_') advance();
-
-    add_token(IDENTIFIER);
+    Token_Type t = get_keyword_type((char*)&source->data[start], current - start);
+    add_token(t);
   };
 
   void add_token(Token_Type type) {
@@ -613,15 +625,15 @@ struct Scanner {
 
   u8 peek() {
     if (at_end()) return '\0';
-    return reader[current];
+    return source->data[current];
   }
   u8 peek_next() {
     if (current + 1 >= end) return '\0';
-    return reader[current + 1];
+    return source->data[current + 1];
   }
   u8 advance() {
     current += 1;
-    return reader[current - 1];
+    return source->data[current - 1];
   }
 
   bool at_end() { return current >= end; }

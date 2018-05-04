@@ -7,6 +7,7 @@
 name := "mitch small";
 longer_name := "mitchell small";
 name: []number = [1, 2, 3];
+if false 0 else 1;
 /*
 main :: (...vargs) {
   return;
