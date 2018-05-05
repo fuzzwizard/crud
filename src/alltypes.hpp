@@ -386,6 +386,7 @@ enum Token_Type {
 
   LINE_COMMENT,
   BLOCK_COMMENT,
+  NEWLINE,
 
   END_OF_FILE
 };
@@ -410,9 +411,8 @@ const char* token_type_to_string(Token_Type t) {
     Case(L_BRACKET); Case(R_BRACKET);
 
     Case(IDENTIFIER); Case(NUMBER); Case(STRING);
-    Case(LINE_COMMENT);
 
-    Case(BLOCK_COMMENT);
+    Case(LINE_COMMENT); Case(BLOCK_COMMENT); Case(NEWLINE);
 
     // keywords
     Case(AND);    Case(OR);
@@ -454,7 +454,7 @@ Token_Type get_keyword_type(char * str, size_t str_l) {
     if (string_match(str, k->lexeme, str_l)) return k->type;
     k++;
   }
-  return IDENTIFIER; // regular old identifier
+  return IDENTIFIER; // regular old identifier if it aint in the table
 }
 
 struct Token {
@@ -463,14 +463,12 @@ struct Token {
 };
 
 struct Scanner {
-  u8* reader = nullptr; // TODO: why do we steal the pointer from the source?
   size_t start = 0, current = 0, line = 0, end = 0;
   Buffer* source;
   Array<Token> tokens;
 
   Scanner(Buffer* b) {
     source = b;
-    reader = b->data;
     end = b->count;
     tokens.initialize();
   }
@@ -561,7 +559,7 @@ struct Scanner {
         }
       }break;
 
-      case '\n': line++; break;
+      case '\n': add_token(NEWLINE); line++; break;
 
       case '\r':
       case '\t':
